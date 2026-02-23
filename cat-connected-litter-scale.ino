@@ -1,4 +1,4 @@
-#include <ElegantOTA.h>
+//#include <ElegantOTA.h>
 #include <M5Atom.h>
 #include "HX711.h"
 #include <WiFi.h>
@@ -7,7 +7,7 @@
 
 // --- CONFIGURATION WI-FI ---
 const char* ssid     = "SSID";
-const char* password = "PASSWORD";
+const char* password = "¨PASSWORD";
 
 // --- CONFIGURATION TELEGRAM ---
 const String botToken = "BOTTOKEN";
@@ -24,7 +24,7 @@ float poidsEntree = 0;
 bool occupe = false;
 unsigned long tempsEntree = 0;
 
-WebServer server(80);
+//WebServer server(80);
 
 // --- FONCTION NOTIFICATION TELEGRAM ---
 void envoyerNotification(String chat, String action, float poids, float poids_chat, unsigned long duree, String alerte) {
@@ -54,9 +54,9 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
         if (http.begin(client, url)) { 
             int httpCode = http.GET();
             if (httpCode > 0) {
-                //Serial.printf("Telegram envoyé ! Code : %d\n", httpCode);
+                Serial.printf("Telegram envoyé ! Code : %d\n", httpCode);
             } else {
-                //Serial.printf("Erreur HTTP : %s\n", http.errorToString(httpCode).c_str());
+                Serial.printf("Erreur HTTP : %s\n", http.errorToString(httpCode).c_str());
             }
             http.end();
         }
@@ -64,7 +64,7 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
 }
 
 void setup() {
-    //Serial.begin(115200);
+    Serial.begin(115200);
     btStop();
 
     M5.begin(false, false, true);
@@ -83,13 +83,13 @@ void setup() {
 
     //Serial.print("IP address: ");
     //Serial.println(WiFi.localIP());
-    server.on("/", []() {
-    server.send(200, "text/plain", "Hi! This is ElegantOTA Demo.");
-    });
+    //server.on("/", []() {
+    //server.send(200, "text/plain", "Hi! This is ElegantOTA Demo.");
+    //});
     
-    ElegantOTA.begin(&server);    // Start ElegantOTA
-    ElegantOTA.setAutoReboot(true);
-    server.begin();
+    //ElegantOTA.begin(&server);    // Start ElegantOTA
+    //ElegantOTA.setAutoReboot(true);
+    //server.begin();
 
     //Serial.print("Server started");
 
@@ -131,8 +131,8 @@ void verifierConnexion() {
 }
 
 void loop() {
-    server.handleClient();
-    ElegantOTA.loop();
+    //server.handleClient();
+    //ElegantOTA.loop();
     M5.update();
     
     // Mesure du poids (moyenne de 5)
