@@ -36,7 +36,7 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
         
         // Construction du message (on utilise des %0A pour les sauts de ligne)
         String message = "Rapport Litiere %0A";
-        message += "Chat : " + chat + "%0A" + "Poids" + String(poids_chat, 1) + "g %0A";
+        message += "Chat : " + chat + "%0A" + "Poids " + String(poids_chat, 1) + "kg%0A";
         message += "Action : " + action + "%0A";
         if (poids > 0) message += "*Poids :* " + String(poids, 1) + "g %0A";
         if (duree > 0) message += "*Durée :* " + String(duree) + "s";
@@ -54,9 +54,9 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
         if (http.begin(client, url)) { 
             int httpCode = http.GET();
             if (httpCode > 0) {
-                Serial.printf("Telegram envoyé ! Code : %d\n", httpCode);
+                //Serial.printf("Telegram envoyé ! Code : %d\n", httpCode);
             } else {
-                Serial.printf("Erreur HTTP : %s\n", http.errorToString(httpCode).c_str());
+                //Serial.printf("Erreur HTTP : %s\n", http.errorToString(httpCode).c_str());
             }
             http.end();
         }
@@ -64,7 +64,7 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
 }
 
 void setup() {
-    Serial.begin(115200);
+    //Serial.begin(115200);
     btStop();
 
     M5.begin(false, false, true);
@@ -74,15 +74,15 @@ void setup() {
     WiFi.mode(WIFI_STA);
     WiFi.setSleep(false);
     WiFi.begin(ssid, password);
-    Serial.print("Connexion Wi-Fi");
+    //Serial.print("Connexion Wi-Fi");
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        Serial.print(".");
+        //Serial.print(".");
     }
-    Serial.println("\nWi-Fi Connecté !");
+    //Serial.println("\nWi-Fi Connecté !");
 
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
+    //Serial.print("IP address: ");
+    //Serial.println(WiFi.localIP());
     server.on("/", []() {
     server.send(200, "text/plain", "Hi! This is ElegantOTA Demo.");
     });
@@ -91,7 +91,7 @@ void setup() {
     ElegantOTA.setAutoReboot(true);
     server.begin();
 
-    Serial.print("Server started");
+    //Serial.print("Server started");
 
     // 2. Initialisation Balance
     M5.dis.fillpix(0xff0000); // Rouge pendant la tare
@@ -104,13 +104,13 @@ void setup() {
     scale.tare();
     
     M5.dis.fillpix(0x00ff00); // Vert : Prêt !
-    Serial.println("Système de litière prêt et calibré.");
+    //Serial.println("Système de litière prêt et calibré.");
     envoyerNotification("Système", "Litière connectée et prête !", 0, 0, 0, "");
 }
 
 void verifierConnexion() {
     if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("Connexion perdue. Tentative de reconnexion...");
+        //Serial.println("Connexion perdue. Tentative de reconnexion...");
         M5.dis.fillpix(0x330000); // Rouge sombre pour indiquer le souci
         
         WiFi.disconnect();
@@ -124,7 +124,7 @@ void verifierConnexion() {
         }
         
         if (WiFi.status() == WL_CONNECTED) {
-            Serial.println("✅ Reconnecté !");
+            //Serial.println("✅ Reconnecté !");
             M5.dis.fillpix(0x00ff00); // Retour au vert
         }
     }
@@ -140,7 +140,7 @@ void loop() {
 
     // --- 1. DÉTECTION D'ENTRÉE ---
     if (weight > 2.0 && !occupe) {
-        Serial.println("Mouvement détecté, vérification stabilité...");
+        //Serial.println("Mouvement détecté, vérification stabilité...");
         delay(1500); 
         float weightStable = scale.get_units(10) / 1000.0; 
         
@@ -149,7 +149,7 @@ void loop() {
             poidsEntree = weightStable; 
             tempsEntree = millis(); 
             M5.dis.fillpix(0xff0000); // Rouge : Occupé
-            Serial.println("\n--- CHAT ENTRÉ ---");
+            //Serial.println("\n--- CHAT ENTRÉ ---");
         }
     }
 
@@ -163,7 +163,7 @@ void loop() {
 
     // --- 3. DÉTECTION DE SORTIE ---
     if (weight < 1.0 && occupe) {
-        Serial.println("Chat sorti, analyse finale...");
+        //Serial.println("Chat sorti, analyse finale...");
         delay(5000); // Temps pour que le chat s'éloigne et que la balance se stabilise
         
         float poidsFinalGrames = scale.get_units(15); 
@@ -209,26 +209,27 @@ void loop() {
         // Envoi du rapport via Telegram
         verifierConnexion();
         envoyerNotification(nomChat, diagnostic, poidsFinalGrames, poidsEntree, dureeSession, alerte);
-
         // Reset pour la suite
-        Serial.println("Reset Balance...");
+        //Serial.println("Reset Balance...");
         delay(500);
         scale.tare(); 
         occupe = false;
+        poidsEntree = 0;
+        tempsEntree = 0;
         M5.dis.fillpix(0x00ff00); 
     }
 
     // --- 4. DÉTECTION NETTOYAGE (Auto-Tare) ---
     // Si le poids est négatif (ex: -50g), cela veut dire qu'on a enlevé de la matière
     if (weight < -0.05 && !occupe) { 
-        Serial.println("Poids négatif détecté (Nettoyage ?). Attente stabilité...");
+        //Serial.println("Poids négatif détecté (Nettoyage ?). Attente stabilité...");
         delay(3000); // On attend que tu finisses de pelleter
         
         // On revérifie si c'est toujours négatif après 3 secondes
         float weightCheck = scale.get_units(10) / 1000.0;
         if (weightCheck < -0.05) {
             M5.dis.fillpix(0x00ffff); // Cyan : Auto-Tare en cours
-            Serial.println(">>> AUTO-TARE (Nettoyage détecté)");
+            //Serial.println(">>> AUTO-TARE (Nettoyage détecté)");
             
             scale.tare();
             
@@ -242,9 +243,9 @@ void loop() {
     }
 
     // Debug affichage poids au repos
-    if (!occupe) {
-       Serial.printf("Poids litière : %.2fkg \r", weight);
-    }
+    //if (!occupe) {
+       //Serial.printf("Poids litière : %.2fkg \r", weight);
+    //}
 
     // Tare Manuelle (Bouton central)
     if (M5.Btn.wasPressed()) {
@@ -252,7 +253,7 @@ void loop() {
         scale.tare();
         delay(500);
         M5.dis.fillpix(0x00ff00);
-        Serial.println("\n>>> TARE MANUELLE");
+        ////Serial.println("\n>>> TARE MANUELLE");
         envoyerNotification("Système", "Tare manuelle faite!", 0, 0, 0, "");
     }
 
