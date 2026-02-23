@@ -4,14 +4,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
-
-// --- CONFIGURATION WI-FI ---
-const char* ssid = "SSID";
-const char* password = "PASSWORD";
-
-// --- CONFIGURATION TELEGRAM ---
-const String botToken = "BOTTOKEN";
-const String chatId = "CHATID";
+#include "secrets.h"
 
 // --- CABLAGE HX711 ---
 #define LOADCELL_DOUT_PIN 32

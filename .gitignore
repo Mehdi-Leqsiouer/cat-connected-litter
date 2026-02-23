@@ -39,3 +39,13 @@
 
 # debug information files
 *.dwo
+
+
+# all
+secrets.h
+
+#PlatformIO
+.pio/
+
+#VSCode
+.vscode/

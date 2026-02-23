@@ -1,0 +1,42 @@
+name: Build Firmware
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install PlatformIO
+      run: pip install platformio
+
+    - name: Create secrets.h
+      run: |
+        cat > src/secrets.h << EOF
+        #pragma once
+        const char* ssid      = "${{ secrets.SSID }}";
+        const char* password  = "${{ secrets.PASSWORD }}";
+        const String botToken = "${{ secrets.BOTTOKEN }}";
+        const String chatId   = "${{ secrets.CHATID }}";
+        EOF
+    
+    - name: Build firmware
+      run: pio run
+    
+    - name: Upload firmware artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: firmware
+        path: .pio/build/m5stack-atom/firmware.bin
+        retention-days: 30
