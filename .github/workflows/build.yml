@@ -20,7 +20,7 @@ jobs:
         const String botToken = "${{ secrets.BOTTOKEN }}";
         const String chatId   = "${{ secrets.CHATID }}";
         EOF
-    
+  
     - name: Build firmware
       run: pio run
     
