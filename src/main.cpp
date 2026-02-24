@@ -42,7 +42,7 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
                          unsigned long duree, String alerte);
 void addLog(String message);
 void verifierAlertesSante();
-void envoyerDonnéesSheets(String chat, String action, float poids, float poids_chat,
+void envoyerDonneesSheets(String chat, String action, float poids, float poids_chat,
                           unsigned long duree, String alerte);
 
 void setup() {
@@ -257,7 +257,7 @@ void loop() {
         verifierConnexion();
         envoyerNotification(nomChat, diagnostic, poidsFinalGrames, poidsEntree, dureeSession,
                             alerte);
-        envoyerDonnéesSheets(nomChat, diagnostic, poidsFinalGrames, poidsEntree, dureeSession,
+        envoyerDonneesSheets(nomChat, diagnostic, poidsFinalGrames, poidsEntree, dureeSession,
                              alerte);
         addLog("DEBUG poidsEntree=" + String(poidsEntree, 2) +
                " poidsFinal=" + String(poidsFinalGrames, 1) + " duree=" + String(dureeSession));
@@ -431,7 +431,7 @@ void verifierAlertesSante() {
     }
 }
 
-void envoyerDonnéesSheets(String chat, String action, float poids, float poids_chat,
+void envoyerDonneesSheets(String chat, String action, float poids, float poids_chat,
                           unsigned long duree, String alerte) {
     if (WiFi.status() != WL_CONNECTED) return;
 
