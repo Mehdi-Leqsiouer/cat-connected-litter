@@ -167,8 +167,8 @@ void loop() {
             return;
         }
 
-        delay(2000);
-        float poidsFinalGrames = scale.get_units(20);
+        delay(3000);
+        float poidsFinalGrames = scale.get_units(30);
         unsigned long dureeSession = (millis() - tempsEntree) / 1000;
 
         // Identification du chat
