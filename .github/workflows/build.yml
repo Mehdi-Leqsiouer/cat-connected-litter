@@ -28,6 +28,7 @@ jobs:
         const char* password  = "${{ secrets.PASSWORD }}";
         const String botToken = "${{ secrets.BOTTOKEN }}";
         const String chatId   = "${{ secrets.CHATID }}";
+        const char* sheetsWebhookUrl   = "${{ secrets.SHEETS_WEBHOOK_URL }}";
         EOF
     
     - name: Build firmware
