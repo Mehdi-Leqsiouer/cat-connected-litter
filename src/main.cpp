@@ -298,6 +298,8 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
       message += "%0A%0A" + alerte;  // Ajoute l'alerte en bas du message
     }
 
+    addLog("Envoi Telegram : " + message);
+
     message.replace(" ", "%20");  // Remplace les espaces pour l'URL
 
     // URL Telegram
@@ -307,9 +309,9 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
     if (http.begin(client, url)) {
       int httpCode = http.GET();
       if (httpCode > 0) {
-        Serial.printf("Telegram envoyé ! Code : %d\n", httpCode);
+        addLog("Telegram envoyé ! Code : " + String(httpCode));
       } else {
-        Serial.printf("Erreur HTTP : %s\n", http.errorToString(httpCode).c_str());
+        addLog("Erreur HTTP : " + http.errorToString(httpCode));
       }
       http.end();
     }
@@ -326,6 +328,7 @@ void addLog(String message) {
     logBuffer = logBuffer.substring(firstBreak + 4);
     logLineCount--;
   }
+  Serial.println(message);
 }
 
 void verifierConnexion() {
