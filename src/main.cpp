@@ -3,6 +3,8 @@
 #include <M5Atom.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
+#include <esp_ota_ops.h>
+#include <esp_task_wdt.h>
 
 #include "HX711.h"
 #include "secrets.h"
@@ -62,6 +64,8 @@ void setup() {
         addLog(".");
     }
     addLog("\nWi-Fi Connecté !");
+    esp_task_wdt_init(30, true);  // reboot if loop() hangs for 30 seconds
+    esp_task_wdt_add(NULL);
 
     addLog("IP address: ");
     addLog(String(WiFi.localIP()));
@@ -111,9 +115,13 @@ void setup() {
     addLog("Système de litière prêt et calibré.");
     verifierConnexion();
     envoyerNotification("Système", "Litière connectée et prête !", 0, 0, 0, "");
+
+    esp_ota_mark_app_valid_cancel_rollback();
+    addLog("Firmware marqué comme valide ✅");
 }
 
 void loop() {
+    esp_task_wdt_reset();
     server.handleClient();
     ElegantOTA.loop();
     M5.update();
