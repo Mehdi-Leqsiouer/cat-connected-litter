@@ -19,3 +19,18 @@ jobs:
       - name: Check formatting
         run: |
           clang-format --dry-run --Werror src/main.cpp
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install cppcheck
+        run: sudo apt-get install -y cppcheck
+      
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=all \
+                   --suppress=missingInclude \
+                   --error-exitcode=1 \
+                   src/main.cpp
