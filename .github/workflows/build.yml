@@ -1,15 +1,23 @@
-name: Build and deploy Firmware
+name: Build Firmware
 
 on:
   push:
     branches: [ main ]
     
 jobs:
-  build-and-deploy:
-    runs-on: self-hosted
+  build:
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install PlatformIO
+      run: pip install platformio
 
     - name: Create secrets.h
       run: |
@@ -20,15 +28,13 @@ jobs:
         const String botToken = "${{ secrets.BOTTOKEN }}";
         const String chatId   = "${{ secrets.CHATID }}";
         EOF
-  
-    - name: Build firmware
-      run: |
-        source ~/platformio-venv/bin/activate
-        pio run
     
-    - name: Deploy via OTA
-      run: |
-        curl -X POST \
-          http://${{ secrets.ESP32_IP }}/update \
-          -H "Content-Type: multipart/form-data" \
-          -F "firmware=@.pio/build/m5stack-atom/firmware.bin"
+    - name: Build firmware
+      run: pio run
+    
+    - name: Upload firmware artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: firmware
+        path: .pio/build/m5stack-atom/firmware.bin
+        retention-days: 30
