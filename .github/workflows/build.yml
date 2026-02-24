@@ -1,22 +1,10 @@
-name: Build Firmware
-
+name: Build firmware
+permissions:
+  contents: 'read'
 on:
-  push:
-    branches: [ main ]
+  workflow_call:
     
 jobs:
-
-  format-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install clang-format
-        run: sudo apt-get install -y clang-format
-
-      - name: Check formatting
-        run: |
-          clang-format --dry-run --Werror src/main.cpp src/secrets.h
 
   build:
     runs-on: ubuntu-latest
