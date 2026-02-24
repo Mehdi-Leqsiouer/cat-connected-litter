@@ -1,0 +1,22 @@
+name: Run Checks
+permissions:
+  contents: 'read'
+  id-token: 'write'
+on:
+  workflow_call:
+env:
+  python-version: 3.11
+    
+jobs:
+
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: |
+          clang-format --dry-run --Werror src/main.cpp

@@ -1,0 +1,15 @@
+name: On PR
+permissions:
+  contents: 'read'
+  id-token: 'write'
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  python-version: 3.11
+jobs:
+
+  run-checks:
+    uses: ./.github/workflows/run-checks.yml
+    secrets: inherit
