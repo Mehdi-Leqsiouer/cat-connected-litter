@@ -27,54 +27,9 @@ int logLineCount = 0;
 
 WebServer server(80);
 
-// --- FONCTION NOTIFICATION TELEGRAM ---
-void envoyerNotification(String chat, String action, float poids, float poids_chat, unsigned long duree, String alerte) {
-  if (WiFi.status() == WL_CONNECTED) {
-    WiFiClientSecure client;
-    client.setInsecure();  // C'est ICI qu'on dit à l'ESP32 d'ignorer le certificat SSL
-
-    HTTPClient http;
-
-    // Construction du message (on utilise des %0A pour les sauts de ligne)
-    String message = "Rapport Litiere %0A";
-    message += "Chat : " + chat + "%0A" + "Poids " + String(poids_chat, 1) + "kg%0A";
-    message += "Action : " + action + "%0A";
-    if (poids > 0) message += "*Poids :* " + String(poids, 1) + "g %0A";
-    if (duree > 0) message += "*Durée :* " + String(duree) + "s";
-
-    if (alerte != "") {
-      message += "%0A%0A" + alerte;  // Ajoute l'alerte en bas du message
-    }
-
-    message.replace(" ", "%20");  // Remplace les espaces pour l'URL
-
-    // URL Telegram
-    String url = "https://api.telegram.org/bot" + botToken + "/sendMessage?chat_id=" + chatId + "&text=" + message;
-
-    // On passe le 'client' sécurisé à HTTPClient
-    if (http.begin(client, url)) {
-      int httpCode = http.GET();
-      if (httpCode > 0) {
-        Serial.printf("Telegram envoyé ! Code : %d\n", httpCode);
-      } else {
-        Serial.printf("Erreur HTTP : %s\n", http.errorToString(httpCode).c_str());
-      }
-      http.end();
-    }
-  }
-}
-
-void addLog(String message) {
-  String timestamp = String(millis() / 1000) + "s — ";
-  logBuffer += timestamp + message + "<br>";
-  logLineCount++;
-  if (logLineCount > MAX_LOG_LINES) {
-    // Trim oldest entry
-    int firstBreak = logBuffer.indexOf("<br>");
-    logBuffer = logBuffer.substring(firstBreak + 4);
-    logLineCount--;
-  }
-}
+void verifierConnexion();
+void envoyerNotification(String chat, String action, float poids, float poids_chat, unsigned long duree, String alerte);
+void addLog(String message);
 
 void setup() {
   Serial.begin(115200);
@@ -148,28 +103,6 @@ void setup() {
   addLog("Système de litière prêt et calibré.");
   verifierConnexion();
   envoyerNotification("Système", "Litière connectée et prête !", 0, 0, 0, "");
-}
-
-void verifierConnexion() {
-  if (WiFi.status() != WL_CONNECTED) {
-    addLog("Connexion perdue. Tentative de reconnexion...");
-    M5.dis.fillpix(0x330000);  // Rouge sombre pour indiquer le souci
-
-    WiFi.disconnect();
-    WiFi.begin(ssid, password);
-
-    // On attend max 10 secondes pour ne pas bloquer la balance
-    int tentative = 0;
-    while (WiFi.status() != WL_CONNECTED && tentative < 20) {
-      delay(500);
-      tentative++;
-    }
-
-    if (WiFi.status() == WL_CONNECTED) {
-      addLog("✅ Reconnecté !");
-      M5.dis.fillpix(0x00ff00);  // Retour au vert
-    }
-  }
 }
 
 void loop() {
@@ -344,4 +277,75 @@ void loop() {
   }
 
   if (!otaInProgress) delay(200);
+}
+
+// --- FONCTION NOTIFICATION TELEGRAM ---
+void envoyerNotification(String chat, String action, float poids, float poids_chat, unsigned long duree, String alerte) {
+  if (WiFi.status() == WL_CONNECTED) {
+    WiFiClientSecure client;
+    client.setInsecure();  // C'est ICI qu'on dit à l'ESP32 d'ignorer le certificat SSL
+
+    HTTPClient http;
+
+    // Construction du message (on utilise des %0A pour les sauts de ligne)
+    String message = "Rapport Litiere %0A";
+    message += "Chat : " + chat + "%0A" + "Poids " + String(poids_chat, 1) + "kg%0A";
+    message += "Action : " + action + "%0A";
+    if (poids > 0) message += "*Poids :* " + String(poids, 1) + "g %0A";
+    if (duree > 0) message += "*Durée :* " + String(duree) + "s";
+
+    if (alerte != "") {
+      message += "%0A%0A" + alerte;  // Ajoute l'alerte en bas du message
+    }
+
+    message.replace(" ", "%20");  // Remplace les espaces pour l'URL
+
+    // URL Telegram
+    String url = "https://api.telegram.org/bot" + botToken + "/sendMessage?chat_id=" + chatId + "&text=" + message;
+
+    // On passe le 'client' sécurisé à HTTPClient
+    if (http.begin(client, url)) {
+      int httpCode = http.GET();
+      if (httpCode > 0) {
+        Serial.printf("Telegram envoyé ! Code : %d\n", httpCode);
+      } else {
+        Serial.printf("Erreur HTTP : %s\n", http.errorToString(httpCode).c_str());
+      }
+      http.end();
+    }
+  }
+}
+
+void addLog(String message) {
+  String timestamp = String(millis() / 1000) + "s — ";
+  logBuffer += timestamp + message + "<br>";
+  logLineCount++;
+  if (logLineCount > MAX_LOG_LINES) {
+    // Trim oldest entry
+    int firstBreak = logBuffer.indexOf("<br>");
+    logBuffer = logBuffer.substring(firstBreak + 4);
+    logLineCount--;
+  }
+}
+
+void verifierConnexion() {
+  if (WiFi.status() != WL_CONNECTED) {
+    addLog("Connexion perdue. Tentative de reconnexion...");
+    M5.dis.fillpix(0x330000);  // Rouge sombre pour indiquer le souci
+
+    WiFi.disconnect();
+    WiFi.begin(ssid, password);
+
+    // On attend max 10 secondes pour ne pas bloquer la balance
+    int tentative = 0;
+    while (WiFi.status() != WL_CONNECTED && tentative < 20) {
+      delay(500);
+      tentative++;
+    }
+
+    if (WiFi.status() == WL_CONNECTED) {
+      addLog("✅ Reconnecté !");
+      M5.dis.fillpix(0x00ff00);  // Retour au vert
+    }
+  }
 }
