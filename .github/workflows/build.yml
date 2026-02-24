@@ -16,7 +16,7 @@ jobs:
 
       - name: Check formatting
         run: |
-          clang-format --dry-run --Werror src/main.cpp src/secrets.h
+          clang-format --dry-run --Werror src/main.cpp
 
   build:
     runs-on: ubuntu-latest
