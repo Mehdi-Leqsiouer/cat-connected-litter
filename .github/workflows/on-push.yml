@@ -6,6 +6,7 @@ name: CI CD Pipeline
 on:
   push:
     branches:
+      - 'dev'
       - 'main'
 env:
   python-version: 3.11
@@ -16,6 +17,7 @@ jobs:
     secrets: inherit
 
   build:
+    if: github.ref == 'refs/heads/main' # Only run build on main branch
     needs: run-checks
     uses: ./.github/workflows/build.yml
     secrets: inherit
