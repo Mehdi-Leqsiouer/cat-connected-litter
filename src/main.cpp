@@ -26,12 +26,22 @@ String logBuffer = "";
 const int MAX_LOG_LINES = 50;
 int logLineCount = 0;
 
+// --- SUIVI DERNIÈRE ACTIVITÉ ---
+unsigned long sullyDernierPipi = 0;
+unsigned long sullyDernierCaca = 0;
+unsigned long krokmouDernierPipi = 0;
+unsigned long krokmouDernierCaca = 0;
+
+const unsigned long ALERTE_PIPI_MS = 24UL * 60 * 60 * 1000;  // 24h en ms
+const unsigned long ALERTE_CACA_MS = 48UL * 60 * 60 * 1000;  // 48h en ms
+
 WebServer server(80);
 
 void verifierConnexion();
 void envoyerNotification(String chat, String action, float poids, float poids_chat,
                          unsigned long duree, String alerte);
 void addLog(String message);
+void verifierAlertesSante();
 
 void setup() {
     Serial.begin(115200);
@@ -108,6 +118,8 @@ void loop() {
 
     // Mesure du poids (moyenne de 5)
     float weight = scale.get_units(5) / 1000.0;
+
+    static unsigned long dernierCheck = 0;
 
     // --- 1. DÉTECTION D'ENTRÉE ---
     if (weight > 2.0 && !occupe) {
@@ -190,9 +202,11 @@ void loop() {
                 if (dureeSession > 90) alerte = "*Alerte :* Grattage long sans résultat.";
             } else if (poidsFinalGrames < 35.0) {
                 diagnostic = dureeSession > 120 ? "Petit Pipi 🟡" : "Pipi 🟡";
+                sullyDernierPipi = millis();
                 if (dureeSession > 120) alerte = "*Vigilance :* Long pour un petit résultat.";
             } else {
                 diagnostic = dureeSession > 90 ? "Caca 🟤" : "Gros Pipi 🟡";
+                sullyDernierCaca = millis();
             }
         } else if (nomChat == "Krokmou") {  // ~7.5kg
             if (poidsFinalGrames < 20.0) {
@@ -200,9 +214,11 @@ void loop() {
                 if (dureeSession > 90) alerte = "*Alerte :* Grattage long sans résultat.";
             } else if (poidsFinalGrames < 70.0) {
                 diagnostic = dureeSession > 120 ? "Petit Pipi 🟡" : "Pipi 🟡";
+                krokmouDernierPipi = millis();
                 if (dureeSession > 120) alerte = "*Vigilance :* Long pour un petit résultat.";
             } else {
                 diagnostic = dureeSession > 90 ? "Caca 🟤" : "Gros Pipi 🟡";
+                krokmouDernierCaca = millis();
             }
         } else {
             // Inconnu - fallback aux anciens seuils
@@ -290,6 +306,11 @@ void loop() {
         envoyerNotification("Système", "Tare manuelle faite!", 0, 0, 0, "");
     }
 
+    if (millis() - dernierCheck > 60000) {  // every minute
+        dernierCheck = millis();
+        verifierAlertesSante();
+    }
+
     if (!otaInProgress) delay(200);
 }
 
@@ -366,5 +387,42 @@ void verifierConnexion() {
             addLog("✅ Reconnecté !");
             M5.dis.fillpix(0x00ff00);  // Retour au vert
         }
+    }
+}
+
+void verifierAlertesSante() {
+    unsigned long maintenant = millis();
+    String alerte = "";
+
+    // Sully - Pipi
+    if (sullyDernierPipi > 0 && (maintenant - sullyDernierPipi > ALERTE_PIPI_MS)) {
+        alerte = "⚠️ Sully n'a pas fait pipi depuis +24h !";
+        addLog(alerte);
+        envoyerNotification("Sully", "Alerte Santé", 0, 0, 0, alerte);
+        sullyDernierPipi = maintenant;  // reset pour ne pas respammer
+    }
+
+    // Sully - Caca
+    if (sullyDernierCaca > 0 && (maintenant - sullyDernierCaca > ALERTE_CACA_MS)) {
+        alerte = "⚠️ Sully n'a pas fait caca depuis +48h !";
+        addLog(alerte);
+        envoyerNotification("Sully", "Alerte Santé", 0, 0, 0, alerte);
+        sullyDernierCaca = maintenant;
+    }
+
+    // Krokmou - Pipi
+    if (krokmouDernierPipi > 0 && (maintenant - krokmouDernierPipi > ALERTE_PIPI_MS)) {
+        alerte = "⚠️ Krokmou n'a pas fait pipi depuis +24h !";
+        addLog(alerte);
+        envoyerNotification("Krokmou", "Alerte Santé", 0, 0, 0, alerte);
+        krokmouDernierPipi = maintenant;
+    }
+
+    // Krokmou - Caca
+    if (krokmouDernierCaca > 0 && (maintenant - krokmouDernierCaca > ALERTE_CACA_MS)) {
+        alerte = "⚠️ Krokmou n'a pas fait caca depuis +48h !";
+        addLog(alerte);
+        envoyerNotification("Krokmou", "Alerte Santé", 0, 0, 0, alerte);
+        krokmouDernierCaca = maintenant;
     }
 }
