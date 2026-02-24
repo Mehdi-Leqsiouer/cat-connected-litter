@@ -42,6 +42,8 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
                          unsigned long duree, String alerte);
 void addLog(String message);
 void verifierAlertesSante();
+void envoyerDonnéesSheets(String chat, String action, float poids, float poids_chat,
+                          unsigned long duree, String alerte);
 
 void setup() {
     Serial.begin(115200);
@@ -255,6 +257,8 @@ void loop() {
         verifierConnexion();
         envoyerNotification(nomChat, diagnostic, poidsFinalGrames, poidsEntree, dureeSession,
                             alerte);
+        envoyerDonnéesSheets(nomChat, diagnostic, poidsFinalGrames, poidsEntree, dureeSession,
+                             alerte);
         addLog("DEBUG poidsEntree=" + String(poidsEntree, 2) +
                " poidsFinal=" + String(poidsFinalGrames, 1) + " duree=" + String(dureeSession));
         // Reset pour la suite
@@ -424,5 +428,35 @@ void verifierAlertesSante() {
         addLog(alerte);
         envoyerNotification("Krokmou", "Alerte Santé", 0, 0, 0, alerte);
         krokmouDernierCaca = maintenant;
+    }
+}
+
+void envoyerDonnéesSheets(String chat, String action, float poids, float poids_chat,
+                          unsigned long duree, String alerte) {
+    if (WiFi.status() != WL_CONNECTED) return;
+
+    WiFiClientSecure client;
+    client.setInsecure();
+    HTTPClient http;
+
+    // Build JSON payload
+    String payload = "{";
+    payload += "\"chat\":\"" + chat + "\",";
+    payload += "\"action\":\"" + action + "\",";
+    payload += "\"poids\":" + String(poids, 1) + ",";
+    payload += "\"poids_chat\":" + String(poids_chat, 2) + ",";
+    payload += "\"duree\":" + String(duree) + ",";
+    payload += "\"alerte\":\"" + alerte + "\"";
+    payload += "}";
+
+    if (http.begin(client, sheetsWebhookUrl)) {
+        http.addHeader("Content-Type", "application/json");
+        int httpCode = http.POST(payload);
+        if (httpCode > 0) {
+            addLog("Sheets envoyé ! Code : " + String(httpCode));
+        } else {
+            addLog("Erreur Sheets : " + http.errorToString(httpCode));
+        }
+        http.end();
     }
 }
