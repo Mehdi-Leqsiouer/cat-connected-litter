@@ -22,7 +22,9 @@ jobs:
         EOF
   
     - name: Build firmware
-      run: pio run
+      run: |
+        source ~/platformio-venv/bin/activate
+        pio run
     
     - name: Deploy via OTA
       run: |
