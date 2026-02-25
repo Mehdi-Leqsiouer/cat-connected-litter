@@ -458,6 +458,7 @@ void envoyerDonneesSheets(String chat, String action, float poids, float poids_c
     payload += "}";
 
     if (http.begin(client, sheetsWebhookUrl)) {
+        http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
         http.addHeader("Content-Type", "application/json");
         int httpCode = http.POST(payload);
         if (httpCode > 0) {
