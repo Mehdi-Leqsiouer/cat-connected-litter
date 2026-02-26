@@ -133,7 +133,7 @@ void loop() {
 
     static unsigned long dernierCheck = 0;
 
-    if (millis() - dernierCheckWifi > 30000) {  // every 30 seconds
+    if (millis() - dernierCheckWifi > 30000 && !otaInProgress) {  // every 30 seconds
         dernierCheckWifi = millis();
         verifierConnexion();
     }
