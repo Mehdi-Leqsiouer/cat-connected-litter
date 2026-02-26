@@ -34,6 +34,8 @@ unsigned long sullyDernierCaca = 0;
 unsigned long krokmouDernierPipi = 0;
 unsigned long krokmouDernierCaca = 0;
 
+unsigned long dernierCheckWifi = 0;
+
 const unsigned long ALERTE_PIPI_MS = 24UL * 60 * 60 * 1000;  // 24h en ms
 const unsigned long ALERTE_CACA_MS = 48UL * 60 * 60 * 1000;  // 48h en ms
 
@@ -131,6 +133,11 @@ void loop() {
 
     static unsigned long dernierCheck = 0;
 
+    if (millis() - dernierCheckWifi > 30000) {  // every 30 seconds
+        dernierCheckWifi = millis();
+        verifierConnexion();
+    }
+
     // --- 1. DÉTECTION D'ENTRÉE ---
     if (weight > 2.0 && !occupe) {
         addLog("Mouvement détecté, vérification stabilité...");
@@ -190,6 +197,7 @@ void loop() {
         }
 
         delay(3000);
+        esp_task_wdt_reset();
         float poidsFinalGrames = scale.get_units(30);
         unsigned long dureeSession = (millis() - tempsEntree) / 1000;
 
@@ -240,22 +248,6 @@ void loop() {
                 diagnostic = dureeSession > 90 ? "Caca 🟤" : "Gros Pipi 🟡";
         }
 
-        // --- LOGIQUE SANTÉ AFFINÉE ---
-        // if (poidsFinalGrames < 15.0) {
-        //   diagnostic = "Simple visite";
-        //   if (dureeSession > 90) alerte = "*Alerte :* Grattage long mais rien n'est sorti.";
-        // } else if (poidsFinalGrames >= 15.0 && poidsFinalGrames < 55.0) {
-        //   if (dureeSession > 120) {
-        //     diagnostic = "Petit Pipi";
-        //     alerte = "*Vigilance :* A mis longtemps pour un petit résultat.";
-        //   } else {
-        //     diagnostic = "Petit Pipi";
-        //   }
-        // } else {  // + de 55g
-        //   if (dureeSession > 90) diagnostic = "Caca probable";
-        //   else diagnostic = "Gros Pipi";
-        // }
-
         // Alerte temps extrême (indépendamment du poids)
         if (dureeSession > 240 && alerte == "") {
             alerte = "*Attention :* Session extrêmement longue (+4 min).";
@@ -283,6 +275,7 @@ void loop() {
     if (weight < -0.05 && !occupe) {
         addLog("Poids négatif détecté (Nettoyage ?). Attente stabilité...");
         delay(3000);  // On attend que tu finisses de pelleter
+        esp_task_wdt_reset();
 
         // On revérifie si c'est toujours négatif après 3 secondes
         float weightCheck = scale.get_units(10) / 1000.0;
@@ -298,14 +291,10 @@ void loop() {
                                 "La litière a été remise à zéro automatiquement.");
 
             delay(1000);
+            esp_task_wdt_reset();
             M5.dis.fillpix(0x00ff00);  // Retour au vert
         }
     }
-
-    // Debug affichage poids au repos
-    // if (!occupe) {
-    // addLogf("Poids litière : %.2fkg \r", weight);
-    //}
 
     // Tare Manuelle (Bouton central)
     if (M5.Btn.wasPressed()) {
@@ -404,37 +393,36 @@ void verifierConnexion() {
 
 void verifierAlertesSante() {
     unsigned long maintenant = millis();
-    String alerte = "";
 
     // Sully - Pipi
     if (sullyDernierPipi > 0 && (maintenant - sullyDernierPipi > ALERTE_PIPI_MS)) {
-        alerte = "⚠️ Sully n'a pas fait pipi depuis +24h !";
-        addLog(alerte);
-        envoyerNotification("Sully", "Alerte Santé", 0, 0, 0, alerte);
+        addLog("⚠️ Sully n'a pas fait pipi depuis +24h !");
+        envoyerNotification("Sully", "Alerte Santé", 0, 0, 0,
+                            "⚠️ Sully n'a pas fait pipi depuis +24h !");
         sullyDernierPipi = maintenant;  // reset pour ne pas respammer
     }
 
     // Sully - Caca
     if (sullyDernierCaca > 0 && (maintenant - sullyDernierCaca > ALERTE_CACA_MS)) {
-        alerte = "⚠️ Sully n'a pas fait caca depuis +48h !";
-        addLog(alerte);
-        envoyerNotification("Sully", "Alerte Santé", 0, 0, 0, alerte);
+        addLog("⚠️ Sully n'a pas fait caca depuis +48h !");
+        envoyerNotification("Sully", "Alerte Santé", 0, 0, 0,
+                            "⚠️ Sully n'a pas fait caca depuis +48h !");
         sullyDernierCaca = maintenant;
     }
 
     // Krokmou - Pipi
     if (krokmouDernierPipi > 0 && (maintenant - krokmouDernierPipi > ALERTE_PIPI_MS)) {
-        alerte = "⚠️ Krokmou n'a pas fait pipi depuis +24h !";
-        addLog(alerte);
-        envoyerNotification("Krokmou", "Alerte Santé", 0, 0, 0, alerte);
+        addLog("⚠️ Krokmou n'a pas fait pipi depuis +24h !");
+        envoyerNotification("Krokmou", "Alerte Santé", 0, 0, 0,
+                            "⚠️ Krokmou n'a pas fait pipi depuis +24h !");
         krokmouDernierPipi = maintenant;
     }
 
     // Krokmou - Caca
     if (krokmouDernierCaca > 0 && (maintenant - krokmouDernierCaca > ALERTE_CACA_MS)) {
-        alerte = "⚠️ Krokmou n'a pas fait caca depuis +48h !";
-        addLog(alerte);
-        envoyerNotification("Krokmou", "Alerte Santé", 0, 0, 0, alerte);
+        addLog("⚠️ Krokmou n'a pas fait caca depuis +48h !");
+        envoyerNotification("Krokmou", "Alerte Santé", 0, 0, 0,
+                            "⚠️ Krokmou n'a pas fait caca depuis +48h !");
         krokmouDernierCaca = maintenant;
     }
 }
