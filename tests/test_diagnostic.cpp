@@ -5,6 +5,7 @@
 
 // --- MOCKS (must come first, before any src includes) ---
 void addLog(String message) {}  // stub, does nothing
+void sauvegarderTimestamps() {}
 
 // --- SRC INCLUDES ---
 #include "../src/config.h"

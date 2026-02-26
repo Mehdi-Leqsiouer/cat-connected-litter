@@ -1,5 +1,6 @@
 #include <ElegantOTA.h>
 #include <M5Atom.h>
+#include <Preferences.h>
 #include <WebServer.h>
 #include <WiFi.h>
 #include <esp_ota_ops.h>
@@ -44,6 +45,8 @@ void detecterEntree();
 void traiterSortieChat();
 void detecterNettoyage();
 
+Preferences prefs;
+
 // ---------------------------------------------------------------------------
 // SETUP
 // ---------------------------------------------------------------------------
@@ -60,6 +63,15 @@ void setup() {
     addLog("Connexion Wi-Fi...");
     while (WiFi.status() != WL_CONNECTED) delay(500);
     addLog("Wi-Fi Connecté ! IP : " + WiFi.localIP().toString());
+
+    prefs.begin("litiere", false);
+    sullyDernierPipi = prefs.getULong("s_pipi", 0);
+    sullyDernierCaca = prefs.getULong("s_caca", 0);
+    krokmouDernierPipi = prefs.getULong("k_pipi", 0);
+    krokmouDernierCaca = prefs.getULong("k_caca", 0);
+    addLog("NVS chargé — s_pipi=" + String(sullyDernierPipi) +
+           " s_caca=" + String(sullyDernierCaca) + " k_pipi=" + String(krokmouDernierPipi) +
+           " k_caca=" + String(krokmouDernierCaca));
 
     // Watchdog
     esp_task_wdt_init(WDT_TIMEOUT_S, true);
