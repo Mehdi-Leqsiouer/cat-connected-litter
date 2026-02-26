@@ -66,7 +66,28 @@ void setup() {
     esp_task_wdt_add(NULL);
 
     // Routes web
-    server.on("/", []() { server.send(200, "text/plain", "Litière connectée !"); });
+    server.on("/", []() {
+        String html = "<html><head><meta charset='UTF-8'></head><body>";
+        html += "<h1>🐱 Litière</h1>";
+        html += "<p>État : " + String(occupe ? "🔴 Occupée" : "🟢 Libre") + "</p>";
+        html += "<p>Dernier pipi Sully : " + String((millis() - sullyDernierPipi) / 3600000) +
+                "h ago</p>";
+        html += "<p>Dernier pipi Krokmou : " + String((millis() - krokmouDernierPipi) / 3600000) +
+                "h ago</p>";
+        html += "<a href='/logs'>Logs</a> | <a href='/tare'>Tare</a> | <a href='/update'>OTA</a>";
+        html += "</body></html>";
+        server.send(200, "text/html", html);
+    });
+
+    server.on("/status", []() {
+        String json = "{";
+        json += "\"occupe\":" + String(occupe ? "true" : "false") + ",";
+        json += "\"uptime\":" + String(millis() / 1000) + ",";
+        json += "\"sully_dernier_pipi\":" + String(sullyDernierPipi) + ",";
+        json += "\"krokmou_dernier_pipi\":" + String(krokmouDernierPipi);
+        json += "}";
+        server.send(200, "application/json", json);
+    });
 
     server.on("/tare", []() {
         M5.dis.fillpix(LED_BLEU);
