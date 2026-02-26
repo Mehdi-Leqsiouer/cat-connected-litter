@@ -126,8 +126,17 @@ void setup() {
     // OTA
     ElegantOTA.begin(&server);
     ElegantOTA.setAutoReboot(true);
-    ElegantOTA.onStart([]() { otaInProgress = true; });
-    ElegantOTA.onEnd([](bool success) { otaInProgress = false; });
+    ElegantOTA.onStart([]() {
+        otaInProgress = true;
+        esp_task_wdt_delete(NULL);  // 👈 disable watchdog during OTA
+        addLog("OTA démarré...");
+    });
+
+    ElegantOTA.onEnd([](bool success) {
+        otaInProgress = false;
+        esp_task_wdt_add(NULL);  // 👈 re-enable watchdog after OTA
+        addLog(success ? "OTA réussi ✅" : "OTA échoué ❌");
+    });
     server.begin();
     addLog("Serveur démarré.");
 
@@ -155,9 +164,9 @@ void setup() {
 // LOOP
 // ---------------------------------------------------------------------------
 void loop() {
-    esp_task_wdt_reset();
     server.handleClient();
     ElegantOTA.loop();
+    esp_task_wdt_reset();
     M5.update();
 
     float weight = scale.get_units(5) / 1000.0;
