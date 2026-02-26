@@ -456,13 +456,16 @@ void envoyerDonneesSheets(String chat, String action, float poids, float poids_c
     payload += "\"duree\":" + String(duree) + ",";
     payload += "\"alerte\":\"" + alerte + "\"";
     payload += "}";
+    addLog("Payload: " + payload);
 
     if (http.begin(client, sheetsWebhookUrl)) {
         http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
         http.addHeader("Content-Type", "application/json");
         int httpCode = http.POST(payload);
         if (httpCode > 0) {
-            addLog("Sheets envoyé ! Code : " + String(httpCode));
+            String response = http.getString();
+            addLog("Sheets envoyé ! Code : " + String(httpCode) + " Response: " + response);
+
         } else {
             addLog("Erreur Sheets : " + http.errorToString(httpCode));
         }
