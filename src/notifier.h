@@ -88,8 +88,7 @@ void envoyerDonneesSheets(String chat, String action, float poids, float poids_c
         http.addHeader("Content-Type", "application/json");
         int httpCode = http.POST(payload);
         if (httpCode > 0) {
-            String response = http.getString();
-            addLog("Sheets envoyé ! Code : " + String(httpCode) + " Response: " + response);
+            addLog("Sheets envoyé ! Code : " + String(httpCode));
         } else {
             addLog("Erreur Sheets : " + http.errorToString(httpCode));
         }
