@@ -1,31 +1,31 @@
-// tests/test_diagnostic.cpp
 #include <cassert>
 #include <iostream>
-#include <string>
-typedef std::string String;
 
+#include "Arduino.h"  //
+
+// --- MOCKS (must come first, before any src includes) ---
+void addLog(String message) {}  // stub, does nothing
+
+// --- SRC INCLUDES ---
+#include "../src/config.h"
+#include "../src/diagnostic.h"
+
+// --- GLOBAL STATE (required by diagnostic.h) ---
 unsigned long sullyDernierPipi = 0;
 unsigned long sullyDernierCaca = 0;
 unsigned long krokmouDernierPipi = 0;
 unsigned long krokmouDernierCaca = 0;
 
-// Mock millis()
-unsigned long millis() { return 0; }
-
-#include "../src/config.h"
-#include "../src/diagnostic.h"
-
-// --- identifierChat ---
+// --- TESTS ---
 void test_identifierChat() {
     assert(identifierChat(3.5) == "Sully");
     assert(identifierChat(7.5) == "Krokmou");
-    assert(identifierChat(5.5) == "Inconnu");   // boundary
-    assert(identifierChat(1.0) == "Inconnu");   // trop léger
-    assert(identifierChat(10.0) == "Inconnu");  // trop lourd
+    assert(identifierChat(5.5) == "Inconnu");
+    assert(identifierChat(1.0) == "Inconnu");
+    assert(identifierChat(10.0) == "Inconnu");
     std::cout << "✅ identifierChat OK\n";
 }
 
-// --- Sully diagnostics ---
 void test_diagnostic_sully_visite() {
     String d, a;
     calculerDiagnostic("Sully", 5.0, 30, d, a);
@@ -38,7 +38,7 @@ void test_diagnostic_sully_visite_longue() {
     String d, a;
     calculerDiagnostic("Sully", 5.0, 95, d, a);
     assert(d == "Simple visite");
-    assert(a != "");  // doit avoir une alerte grattage
+    assert(a != "");
     std::cout << "✅ Sully visite longue OK\n";
 }
 
@@ -54,7 +54,7 @@ void test_diagnostic_sully_petit_pipi() {
     String d, a;
     calculerDiagnostic("Sully", 20.0, 130, d, a);
     assert(d == "Petit Pipi 🟡");
-    assert(a != "");  // doit avoir une alerte vigilance
+    assert(a != "");
     std::cout << "✅ Sully petit pipi OK\n";
 }
 
@@ -72,7 +72,6 @@ void test_diagnostic_sully_gros_pipi() {
     std::cout << "✅ Sully gros pipi OK\n";
 }
 
-// --- Krokmou diagnostics ---
 void test_diagnostic_krokmou_visite() {
     String d, a;
     calculerDiagnostic("Krokmou", 10.0, 30, d, a);
@@ -94,15 +93,12 @@ void test_diagnostic_krokmou_caca() {
     std::cout << "✅ Krokmou caca OK\n";
 }
 
-// --- Boundaries ---
 void test_boundaries_sully() {
     String d, a;
-    // Exactement à la limite visite/pipi
     calculerDiagnostic("Sully", SULLY_VISITE_MAX, 60, d, a);
-    assert(d == "Pipi 🟡");  // >= SULLY_VISITE_MAX → pipi
-    // Exactement à la limite pipi/caca
+    assert(d == "Pipi 🟡");
     calculerDiagnostic("Sully", SULLY_PIPI_MAX, 60, d, a);
-    assert(d == "Gros Pipi 🟡");  // >= SULLY_PIPI_MAX → gros pipi
+    assert(d == "Gros Pipi 🟡");
     std::cout << "✅ Sully boundaries OK\n";
 }
 

@@ -3,7 +3,6 @@
 #include <M5Atom.h>
 
 #include "config.h"
-#include "logger.h"
 
 // --- SUIVI DERNIÈRE ACTIVITÉ ---
 extern unsigned long sullyDernierPipi;
