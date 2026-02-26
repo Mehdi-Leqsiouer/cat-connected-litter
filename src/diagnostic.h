@@ -3,7 +3,8 @@
 #include <M5Atom.h>
 
 #include "config.h"
-#include "logger.h"
+
+void sauvegarderTimestamps();
 
 // --- SUIVI DERNIÈRE ACTIVITÉ ---
 extern unsigned long sullyDernierPipi;
@@ -38,10 +39,12 @@ void calculerDiagnostic(String nomChat, float poids, unsigned long duree, String
         } else if (poids < SULLY_PIPI_MAX) {
             diagnostic = duree > DUREE_VIGILANCE_S ? "Petit Pipi 🟡" : "Pipi 🟡";
             sullyDernierPipi = millis();
+            sauvegarderTimestamps();
             if (duree > DUREE_VIGILANCE_S) alerte = "*Vigilance :* Long pour un petit résultat.";
         } else {
             diagnostic = duree > DUREE_GRATTAGE_S ? "Caca 🟤" : "Gros Pipi 🟡";
             sullyDernierCaca = millis();
+            sauvegarderTimestamps();
         }
     } else if (nomChat == "Krokmou") {
         if (poids < KROKMOU_VISITE_MAX) {
@@ -50,10 +53,12 @@ void calculerDiagnostic(String nomChat, float poids, unsigned long duree, String
         } else if (poids < KROKMOU_PIPI_MAX) {
             diagnostic = duree > DUREE_VIGILANCE_S ? "Petit Pipi 🟡" : "Pipi 🟡";
             krokmouDernierPipi = millis();
+            sauvegarderTimestamps();
             if (duree > DUREE_VIGILANCE_S) alerte = "*Vigilance :* Long pour un petit résultat.";
         } else {
             diagnostic = duree > DUREE_GRATTAGE_S ? "Caca 🟤" : "Gros Pipi 🟡";
             krokmouDernierCaca = millis();
+            sauvegarderTimestamps();
         }
     } else {
         if (poids < INCONNU_VISITE_MAX)

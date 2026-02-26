@@ -110,23 +110,38 @@ void verifierAlertesSante() {
                             "⚠️ Sully n'a pas fait pipi depuis +24h !");
         addLog("⚠️ Sully n'a pas fait pipi depuis +24h !");
         sullyDernierPipi = maintenant;
+        sauvegarderTimestamps();  // 👈
     }
     if (sullyDernierCaca > 0 && (maintenant - sullyDernierCaca > ALERTE_CACA_MS)) {
         envoyerNotification("Sully", "Alerte Santé", 0, 0, 0,
                             "⚠️ Sully n'a pas fait caca depuis +48h !");
         addLog("⚠️ Sully n'a pas fait caca depuis +48h !");
         sullyDernierCaca = maintenant;
+        sauvegarderTimestamps();  // 👈
     }
     if (krokmouDernierPipi > 0 && (maintenant - krokmouDernierPipi > ALERTE_PIPI_MS)) {
         envoyerNotification("Krokmou", "Alerte Santé", 0, 0, 0,
                             "⚠️ Krokmou n'a pas fait pipi depuis +24h !");
         addLog("⚠️ Krokmou n'a pas fait pipi depuis +24h !");
         krokmouDernierPipi = maintenant;
+        sauvegarderTimestamps();  // 👈
     }
     if (krokmouDernierCaca > 0 && (maintenant - krokmouDernierCaca > ALERTE_CACA_MS)) {
         envoyerNotification("Krokmou", "Alerte Santé", 0, 0, 0,
                             "⚠️ Krokmou n'a pas fait caca depuis +48h !");
         addLog("⚠️ Krokmou n'a pas fait caca depuis +48h !");
         krokmouDernierCaca = maintenant;
+        sauvegarderTimestamps();  // 👈
     }
+}
+
+// Forward declare at top of notifier.h
+extern Preferences prefs;
+
+void sauvegarderTimestamps() {
+    prefs.putULong("s_pipi", sullyDernierPipi);
+    prefs.putULong("s_caca", sullyDernierCaca);
+    prefs.putULong("k_pipi", krokmouDernierPipi);
+    prefs.putULong("k_caca", krokmouDernierCaca);
+    addLog("Timestamps sauvegardés en NVS ✅");
 }

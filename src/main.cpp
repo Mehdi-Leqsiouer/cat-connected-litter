@@ -1,5 +1,6 @@
 #include <ElegantOTA.h>
 #include <M5Atom.h>
+#include <Preferences.h>
 #include <WebServer.h>
 #include <WiFi.h>
 #include <esp_ota_ops.h>
@@ -44,6 +45,8 @@ void detecterEntree();
 void traiterSortieChat();
 void detecterNettoyage();
 
+Preferences prefs;
+
 // ---------------------------------------------------------------------------
 // SETUP
 // ---------------------------------------------------------------------------
@@ -61,12 +64,42 @@ void setup() {
     while (WiFi.status() != WL_CONNECTED) delay(500);
     addLog("Wi-Fi Connecté ! IP : " + WiFi.localIP().toString());
 
+    prefs.begin("litiere", false);
+    sullyDernierPipi = prefs.getULong("s_pipi", 0);
+    sullyDernierCaca = prefs.getULong("s_caca", 0);
+    krokmouDernierPipi = prefs.getULong("k_pipi", 0);
+    krokmouDernierCaca = prefs.getULong("k_caca", 0);
+    addLog("NVS chargé — s_pipi=" + String(sullyDernierPipi) +
+           " s_caca=" + String(sullyDernierCaca) + " k_pipi=" + String(krokmouDernierPipi) +
+           " k_caca=" + String(krokmouDernierCaca));
+
     // Watchdog
     esp_task_wdt_init(WDT_TIMEOUT_S, true);
     esp_task_wdt_add(NULL);
 
     // Routes web
-    server.on("/", []() { server.send(200, "text/plain", "Litière connectée !"); });
+    server.on("/", []() {
+        String html = "<html><head><meta charset='UTF-8'></head><body>";
+        html += "<h1>🐱 Litière</h1>";
+        html += "<p>État : " + String(occupe ? "🔴 Occupée" : "🟢 Libre") + "</p>";
+        html += "<p>Dernier pipi Sully : " + String((millis() - sullyDernierPipi) / 3600000) +
+                "h ago</p>";
+        html += "<p>Dernier pipi Krokmou : " + String((millis() - krokmouDernierPipi) / 3600000) +
+                "h ago</p>";
+        html += "<a href='/logs'>Logs</a> | <a href='/tare'>Tare</a> | <a href='/update'>OTA</a>";
+        html += "</body></html>";
+        server.send(200, "text/html", html);
+    });
+
+    server.on("/status", []() {
+        String json = "{";
+        json += "\"occupe\":" + String(occupe ? "true" : "false") + ",";
+        json += "\"uptime\":" + String(millis() / 1000) + ",";
+        json += "\"sully_dernier_pipi\":" + String(sullyDernierPipi) + ",";
+        json += "\"krokmou_dernier_pipi\":" + String(krokmouDernierPipi);
+        json += "}";
+        server.send(200, "application/json", json);
+    });
 
     server.on("/tare", []() {
         M5.dis.fillpix(LED_BLEU);
