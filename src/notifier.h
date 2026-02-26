@@ -84,10 +84,10 @@ void envoyerDonneesSheets(String chat, String action, float poids, float poids_c
     addLog("Payload Sheets: " + payload);
 
     if (http.begin(client, sheetsWebhookUrl)) {
-        http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
+        // http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS); disable for performance
         http.addHeader("Content-Type", "application/json");
         int httpCode = http.POST(payload);
-        if (httpCode > 0) {
+        if (httpCode == 200 || httpCode == 400 || httpCode == 302) {
             addLog("Sheets envoyé ! Code : " + String(httpCode));
         } else {
             addLog("Erreur Sheets : " + http.errorToString(httpCode));
