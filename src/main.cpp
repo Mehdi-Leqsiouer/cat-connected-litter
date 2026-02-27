@@ -69,6 +69,16 @@ void setup() {
     sullyDernierCaca = prefs.getULong("s_caca", 0);
     krokmouDernierPipi = prefs.getULong("k_pipi", 0);
     krokmouDernierCaca = prefs.getULong("k_caca", 0);
+
+    // Offset correction — remap old millis() values to current boot timeline
+    unsigned long elapsed = prefs.getULong("elapsed_boot", 0);
+    addLog("NVS elapsed_boot=" + String(elapsed) + "ms");
+
+    if (sullyDernierPipi > 0) sullyDernierPipi = millis() + (elapsed - sullyDernierPipi);
+    if (sullyDernierCaca > 0) sullyDernierCaca = millis() + (elapsed - sullyDernierCaca);
+    if (krokmouDernierPipi > 0) krokmouDernierPipi = millis() + (elapsed - krokmouDernierPipi);
+    if (krokmouDernierCaca > 0) krokmouDernierCaca = millis() + (elapsed - krokmouDernierCaca);
+
     addLog("NVS chargé — s_pipi=" + String(sullyDernierPipi) +
            " s_caca=" + String(sullyDernierCaca) + " k_pipi=" + String(krokmouDernierPipi) +
            " k_caca=" + String(krokmouDernierCaca));
