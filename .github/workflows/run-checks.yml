@@ -5,7 +5,7 @@ on:
   workflow_call:
 env:
   python-version: 3.11
-    
+
 jobs:
 
   format-check:
@@ -24,10 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install cppcheck
         run: sudo apt-get install -y cppcheck
-      
+
       - name: Run cppcheck
         run: |
           cppcheck --enable=all \
