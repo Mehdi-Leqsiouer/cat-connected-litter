@@ -74,10 +74,22 @@ void setup() {
     unsigned long elapsed = prefs.getULong("elapsed_boot", 0);
     addLog("NVS elapsed_boot=" + String(elapsed) + "ms");
 
-    if (sullyDernierPipi > 0) sullyDernierPipi = millis() + (elapsed - sullyDernierPipi);
-    if (sullyDernierCaca > 0) sullyDernierCaca = millis() + (elapsed - sullyDernierCaca);
-    if (krokmouDernierPipi > 0) krokmouDernierPipi = millis() + (elapsed - krokmouDernierPipi);
-    if (krokmouDernierCaca > 0) krokmouDernierCaca = millis() + (elapsed - krokmouDernierCaca);
+    if (sullyDernierPipi > 0 && elapsed > sullyDernierPipi) {
+        unsigned long agoMs = elapsed - sullyDernierPipi;
+        sullyDernierPipi = (agoMs < millis()) ? millis() - agoMs : 0;
+    }
+    if (sullyDernierCaca > 0 && elapsed > sullyDernierCaca) {
+        unsigned long agoMs = elapsed - sullyDernierCaca;
+        sullyDernierCaca = (agoMs < millis()) ? millis() - agoMs : 0;
+    }
+    if (krokmouDernierPipi > 0 && elapsed > krokmouDernierPipi) {
+        unsigned long agoMs = elapsed - krokmouDernierPipi;
+        krokmouDernierPipi = (agoMs < millis()) ? millis() - agoMs : 0;
+    }
+    if (krokmouDernierCaca > 0 && elapsed > krokmouDernierCaca) {
+        unsigned long agoMs = elapsed - krokmouDernierCaca;
+        krokmouDernierCaca = (agoMs < millis()) ? millis() - agoMs : 0;
+    }
 
     addLog("NVS chargé — s_pipi=" + String(sullyDernierPipi) +
            " s_caca=" + String(sullyDernierCaca) + " k_pipi=" + String(krokmouDernierPipi) +
