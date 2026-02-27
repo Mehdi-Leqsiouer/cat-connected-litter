@@ -145,5 +145,6 @@ void sauvegarderTimestamps() {
     prefs.putULong("s_caca", sullyDernierCaca);
     prefs.putULong("k_pipi", krokmouDernierPipi);
     prefs.putULong("k_caca", krokmouDernierCaca);
+    prefs.putULong("elapsed_boot", millis());
     addLog("Timestamps sauvegardés en NVS ✅");
 }
