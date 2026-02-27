@@ -42,8 +42,13 @@ void calculerDiagnostic(String nomChat, float poids, unsigned long duree, String
             sauvegarderTimestamps();
             if (duree > DUREE_VIGILANCE_S) alerte = "*Vigilance :* Long pour un petit résultat.";
         } else {
-            diagnostic = duree > DUREE_GRATTAGE_S ? "Caca 🟤" : "Gros Pipi 🟡";
-            sullyDernierCaca = millis();
+            if (duree > DUREE_GRATTAGE_S) {
+                diagnostic = "Caca 🟤";
+                sullyDernierCaca = millis();
+            } else {
+                diagnostic = "Gros Pipi 🟡";
+                sullyDernierPipi = millis();
+            }
             sauvegarderTimestamps();
         }
     } else if (nomChat == "Krokmou") {
@@ -56,8 +61,13 @@ void calculerDiagnostic(String nomChat, float poids, unsigned long duree, String
             sauvegarderTimestamps();
             if (duree > DUREE_VIGILANCE_S) alerte = "*Vigilance :* Long pour un petit résultat.";
         } else {
-            diagnostic = duree > DUREE_GRATTAGE_S ? "Caca 🟤" : "Gros Pipi 🟡";
-            krokmouDernierCaca = millis();
+            if (duree > DUREE_GRATTAGE_S) {
+                diagnostic = "Caca 🟤";
+                krokmouDernierCaca = millis();
+            } else {
+                diagnostic = "Gros Pipi 🟡";
+                krokmouDernierPipi = millis();
+            }
             sauvegarderTimestamps();
         }
     } else {

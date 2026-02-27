@@ -112,6 +112,30 @@ void test_boundaries_krokmou() {
     std::cout << "✅ Krokmou boundaries OK\n";
 }
 
+void test_diagnostic_krokmou_gros_pipi_updates_pipi_timestamp() {
+    sullyDernierPipi = 0;
+    sullyDernierCaca = 0;
+    krokmouDernierPipi = 0;
+    krokmouDernierCaca = 0;
+    String d, a;
+    calculerDiagnostic("Krokmou", 80.0, 60, d, a);  // Gros Pipi
+    assert(d == "Gros Pipi 🟡");
+    assert(krokmouDernierPipi > 0);   // pipi updated ✅
+    assert(krokmouDernierCaca == 0);  // caca NOT updated ✅
+    std::cout << "✅ Krokmou Gros Pipi updates dernierPipi OK\n";
+}
+
+void test_diagnostic_sully_gros_pipi_updates_pipi_timestamp() {
+    sullyDernierPipi = 0;
+    sullyDernierCaca = 0;
+    String d, a;
+    calculerDiagnostic("Sully", 40.0, 60, d, a);  // Gros Pipi
+    assert(d == "Gros Pipi 🟡");
+    assert(sullyDernierPipi > 0);   // pipi updated ✅
+    assert(sullyDernierCaca == 0);  // caca NOT updated ✅
+    std::cout << "✅ Sully Gros Pipi updates dernierPipi OK\n";
+}
+
 int main() {
     test_identifierChat();
     test_diagnostic_sully_visite();

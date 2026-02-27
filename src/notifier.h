@@ -54,6 +54,7 @@ void envoyerNotification(String chat, String action, float poids, float poids_ch
                  "/sendMessage?chat_id=" + String(chatId) + "&text=" + message;
 
     if (http.begin(client, url)) {
+        http.setTimeout(10000);
         int httpCode = http.GET();
         if (httpCode > 0)
             addLog("Telegram envoyé ! Code : " + String(httpCode));
@@ -85,6 +86,7 @@ void envoyerDonneesSheets(String chat, String action, float poids, float poids_c
 
     if (http.begin(client, sheetsWebhookUrl)) {
         // http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS); disable for performance
+        http.setTimeout(10000);
         http.addHeader("Content-Type", "application/json");
         int httpCode = http.POST(payload);
         if (httpCode == 200 || httpCode == 400 || httpCode == 302) {
