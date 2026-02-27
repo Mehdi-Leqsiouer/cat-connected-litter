@@ -86,6 +86,10 @@ void setup() {
                 "h ago</p>";
         html += "<p>Dernier pipi Krokmou : " + String((millis() - krokmouDernierPipi) / 3600000) +
                 "h ago</p>";
+        html += "<p>Dernier caca Sully : " + String((millis() - sullyDernierCaca) / 3600000) +
+                "h ago</p>";
+        html += "<p>Dernier caca Krokmou : " + String((millis() - krokmouDernierCaca) / 3600000) +
+                "h ago</p>";
         html += "<a href='/logs'>Logs</a> | <a href='/tare'>Tare</a> | <a href='/update'>OTA</a>";
         html += "</body></html>";
         server.send(200, "text/html", html);
