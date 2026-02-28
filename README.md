@@ -160,4 +160,4 @@ Contributions welcome! Areas of interest:
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+See [LICENSE](LICENSE.MD) for details.
