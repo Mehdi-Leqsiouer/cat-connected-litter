@@ -267,13 +267,34 @@ void detecterEntree() {
     addLog("Mouvement détecté, vérification stabilité...");
     delay(1500);
 
-    float weightStable = 0;
-    for (int i = 0; i < 5; i++) {
-        weightStable += scale.get_units(10) / 1000.0;
-        delay(300);
+    float readings[10];
+    for (int i = 0; i < 10; i++) {
+        readings[i] = scale.get_units(10) / 1000.0;
+        delay(500);
     }
-    weightStable /= 5;
-    addLog("Poids stabilisé : " + String(weightStable, 2) + "kg");
+
+    // Log all readings for debug
+    String debugReadings = "Lectures : ";
+    for (int i = 0; i < 10; i++) {
+        debugReadings += String(readings[i], 2);
+        if (i < 9) debugReadings += " | ";
+    }
+    addLog(debugReadings);
+
+    // Sort (bubble sort)
+    for (int i = 0; i < 9; i++) {
+        for (int j = i + 1; j < 10; j++) {
+            if (readings[j] < readings[i]) {
+                float tmp = readings[i];
+                readings[i] = readings[j];
+                readings[j] = tmp;
+            }
+        }
+    }
+
+    float weightStable = (readings[4] + readings[5]) / 2.0;
+    addLog("Min=" + String(readings[0], 2) + " Max=" + String(readings[9], 2) +
+           " Median=" + String(weightStable, 2) + "kg");
 
     if (weightStable > SEUIL_ENTREE_KG) {
         occupe = true;
