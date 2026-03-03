@@ -64,36 +64,22 @@ void setup() {
     while (WiFi.status() != WL_CONNECTED) delay(500);
     addLog("Wi-Fi Connecté ! IP : " + WiFi.localIP().toString());
 
+    // NVS — load "how long ago" and convert to current millis() base
     prefs.begin("litiere", false);
-    sullyDernierPipi = prefs.getULong("s_pipi", 0);
-    sullyDernierCaca = prefs.getULong("s_caca", 0);
-    krokmouDernierPipi = prefs.getULong("k_pipi", 0);
-    krokmouDernierCaca = prefs.getULong("k_caca", 0);
+    unsigned long now = millis();
+    unsigned long agoSPipi = prefs.getULong("s_pipi", 0);
+    unsigned long agoSCaca = prefs.getULong("s_caca", 0);
+    unsigned long agoKPipi = prefs.getULong("k_pipi", 0);
+    unsigned long agoKCaca = prefs.getULong("k_caca", 0);
 
-    // Offset correction — remap old millis() values to current boot timeline
-    unsigned long elapsed = prefs.getULong("elapsed_boot", 0);
-    addLog("NVS elapsed_boot=" + String(elapsed) + "ms");
+    sullyDernierPipi = agoSPipi > 0 ? now - agoSPipi : 0;
+    sullyDernierCaca = agoSCaca > 0 ? now - agoSCaca : 0;
+    krokmouDernierPipi = agoKPipi > 0 ? now - agoKPipi : 0;
+    krokmouDernierCaca = agoKCaca > 0 ? now - agoKCaca : 0;
 
-    if (sullyDernierPipi > 0 && elapsed > sullyDernierPipi) {
-        unsigned long agoMs = elapsed - sullyDernierPipi;
-        sullyDernierPipi = (agoMs < millis()) ? millis() - agoMs : 0;
-    }
-    if (sullyDernierCaca > 0 && elapsed > sullyDernierCaca) {
-        unsigned long agoMs = elapsed - sullyDernierCaca;
-        sullyDernierCaca = (agoMs < millis()) ? millis() - agoMs : 0;
-    }
-    if (krokmouDernierPipi > 0 && elapsed > krokmouDernierPipi) {
-        unsigned long agoMs = elapsed - krokmouDernierPipi;
-        krokmouDernierPipi = (agoMs < millis()) ? millis() - agoMs : 0;
-    }
-    if (krokmouDernierCaca > 0 && elapsed > krokmouDernierCaca) {
-        unsigned long agoMs = elapsed - krokmouDernierCaca;
-        krokmouDernierCaca = (agoMs < millis()) ? millis() - agoMs : 0;
-    }
-
-    addLog("NVS chargé — s_pipi=" + String(sullyDernierPipi) +
-           " s_caca=" + String(sullyDernierCaca) + " k_pipi=" + String(krokmouDernierPipi) +
-           " k_caca=" + String(krokmouDernierCaca));
+    addLog("NVS chargé — s_pipi=" + String(agoSPipi / 3600000) + "h ago" + " s_caca=" +
+           String(agoSCaca / 3600000) + "h ago" + " k_pipi=" + String(agoKPipi / 3600000) +
+           "h ago" + " k_caca=" + String(agoKCaca / 3600000) + "h ago");
 
     // Watchdog
     esp_task_wdt_init(WDT_TIMEOUT_S, true);
@@ -137,6 +123,16 @@ void setup() {
         server.send(200, "text/plain", "Tare effectuée !");
     });
 
+    server.on("/reset-nvs", []() {
+        prefs.clear();
+        sullyDernierPipi = 0;
+        sullyDernierCaca = 0;
+        krokmouDernierPipi = 0;
+        krokmouDernierCaca = 0;
+        addLog("NVS réinitialisé ✅");
+        server.send(200, "text/plain", "NVS réinitialisé !");
+    });
+
     server.on("/logs", []() {
         String html = "<html><head>";
         html += "<meta charset='UTF-8'>";
@@ -154,13 +150,12 @@ void setup() {
     ElegantOTA.setAutoReboot(true);
     ElegantOTA.onStart([]() {
         otaInProgress = true;
-        esp_task_wdt_delete(NULL);  // 👈 disable watchdog during OTA
+        esp_task_wdt_delete(NULL);
         addLog("OTA démarré...");
     });
-
     ElegantOTA.onEnd([](bool success) {
         otaInProgress = false;
-        esp_task_wdt_add(NULL);  // 👈 re-enable watchdog after OTA
+        esp_task_wdt_add(NULL);
         addLog(success ? "OTA réussi ✅" : "OTA échoué ❌");
     });
     server.begin();
