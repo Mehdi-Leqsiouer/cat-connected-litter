@@ -353,18 +353,28 @@ void traiterSortieChat() {
 }
 
 void detecterNettoyage() {
-    addLog("Poids négatif détecté (Nettoyage ?). Attente stabilité...");
-    delay(NETTOYAGE_ATTENTE_MS);
+    addLog("Poids négatif détecté. Attente stabilité...");
 
-    float weightCheck = scale.get_units(10) / 1000.0;
-    if (weightCheck < SEUIL_NETTOYAGE_KG) {
+    // Check 3 times over 15 seconds
+    int confirmations = 0;
+    for (int i = 0; i < 3; i++) {
+        esp_task_wdt_reset();
+        delay(NETTOYAGE_ATTENTE_MS);
+        float check = scale.get_units(15) / 1000.0;
+        if (check < SEUIL_NETTOYAGE_KG) confirmations++;
+        addLog("Confirmation " + String(i + 1) + "/3 : " + String(check, 2) + "kg");
+    }
+
+    if (confirmations == 3) {  // all 3 must be negative
         M5.dis.fillpix(LED_CYAN);
-        addLog(">>> AUTO-TARE (Nettoyage détecté)");
+        addLog(">>> AUTO-TARE (Nettoyage confirmé 3/3)");
         scale.tare();
         verifierConnexion();
         envoyerNotification("Système", "Nettoyage détecté", 0, 0, 0,
                             "La litière a été remise à zéro automatiquement.");
         delay(1000);
         M5.dis.fillpix(LED_VERT);
+    } else {
+        addLog("Fausse alerte nettoyage (" + String(confirmations) + "/3)");
     }
 }

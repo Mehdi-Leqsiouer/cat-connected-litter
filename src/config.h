@@ -10,7 +10,7 @@ const float CALIBRATION_SCALE = 24.79f;
 // --- SEUILS POIDS (kg) ---
 const float SEUIL_ENTREE_KG = 2.0;
 const float SEUIL_SORTIE_KG = 1.0;
-const float SEUIL_NETTOYAGE_KG = -0.05;
+const float SEUIL_NETTOYAGE_KG = -0.15;
 
 // --- IDENTIFICATION CHATS (kg) ---
 const float SEUIL_SULLY_MIN = 2.5;
@@ -38,7 +38,7 @@ const unsigned long DUREE_ALERTE_S = 240;
 // --- DURÉES SYSTÈME (ms) ---
 const unsigned long DUREE_SESSION_MAX_MS = 600000;  // 10 min anti-blocage
 const unsigned long EXIT_STABILISATION_MS = 5000;   // attente après sortie
-const unsigned long NETTOYAGE_ATTENTE_MS = 3000;    // attente après poids négatif
+const unsigned long NETTOYAGE_ATTENTE_MS = 5000;    // attente après poids négatif
 const unsigned long WIFI_CHECK_INTERVAL = 30000;    // vérif WiFi toutes les 30s
 const unsigned long SANTE_CHECK_INTERVAL = 60000;   // vérif santé toutes les 60s
 const unsigned long WDT_TIMEOUT_S = 30;             // watchdog timeout
