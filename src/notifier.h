@@ -140,11 +140,12 @@ void verifierAlertesSante() {
 // Forward declare at top of notifier.h
 extern Preferences prefs;
 
+// In sauvegarderTimestamps() — save "how long ago" instead of raw millis
 void sauvegarderTimestamps() {
-    prefs.putULong("s_pipi", sullyDernierPipi);
-    prefs.putULong("s_caca", sullyDernierCaca);
-    prefs.putULong("k_pipi", krokmouDernierPipi);
-    prefs.putULong("k_caca", krokmouDernierCaca);
-    prefs.putULong("elapsed_boot", millis());
+    unsigned long now = millis();
+    prefs.putULong("s_pipi", sullyDernierPipi > 0 ? now - sullyDernierPipi : 0);
+    prefs.putULong("s_caca", sullyDernierCaca > 0 ? now - sullyDernierCaca : 0);
+    prefs.putULong("k_pipi", krokmouDernierPipi > 0 ? now - krokmouDernierPipi : 0);
+    prefs.putULong("k_caca", krokmouDernierCaca > 0 ? now - krokmouDernierCaca : 0);
     addLog("Timestamps sauvegardés en NVS ✅");
 }
