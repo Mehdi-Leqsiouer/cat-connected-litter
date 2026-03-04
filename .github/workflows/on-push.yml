@@ -3,6 +3,9 @@ concurrency: # Cancel any previous runs from the same branch
   cancel-in-progress: true
 
 name: CI CD Pipeline
+permissions:
+  contents: read
+  packages: read
 on:
   push:
     branches:
